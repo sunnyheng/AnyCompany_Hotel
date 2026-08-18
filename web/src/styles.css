@@ -1,0 +1,519 @@
+:root {
+  --navy-950: #0b1526;
+  --navy-900: #101d33;
+  --navy-800: #182842;
+  --navy-700: #223655;
+  --gold-400: #d9b36a;
+  --gold-300: #e8cd94;
+  --ink-100: #f4f6fa;
+  --ink-300: #c4cddb;
+  --ink-500: #8b97ab;
+  --green-400: #5dbb8a;
+  --red-400: #e07070;
+  --radius: 12px;
+  font-family: 'Avenir Next', 'Segoe UI', system-ui, -apple-system, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: linear-gradient(160deg, var(--navy-950), var(--navy-900) 60%);
+  color: var(--ink-100);
+  min-height: 100vh;
+}
+
+button {
+  font: inherit;
+  cursor: pointer;
+  border: none;
+  border-radius: 8px;
+}
+
+input {
+  font: inherit;
+}
+
+.app-shell {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 0 24px 48px;
+}
+
+/* ---------- header ---------- */
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 0;
+  border-bottom: 1px solid var(--navy-700);
+  margin-bottom: 28px;
+}
+
+.brand {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.brand-mark {
+  font-size: 22px;
+  letter-spacing: 3px;
+  color: var(--gold-400);
+  font-weight: 600;
+}
+
+.brand-sub {
+  color: var(--ink-500);
+  font-size: 13px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.header-user {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--ink-300);
+  font-size: 14px;
+}
+
+.mode-pill {
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  letter-spacing: 0.5px;
+  border: 1px solid var(--navy-700);
+  color: var(--gold-300);
+}
+
+.mode-pill.live {
+  color: var(--green-400);
+}
+
+/* ---------- sign-in ---------- */
+
+.signin-wrap {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+}
+
+.signin-card {
+  width: 400px;
+  background: var(--navy-800);
+  border: 1px solid var(--navy-700);
+  border-radius: var(--radius);
+  padding: 36px;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
+}
+
+.signin-card h1 {
+  margin: 4px 0 2px;
+  font-size: 24px;
+  color: var(--gold-300);
+  letter-spacing: 2px;
+}
+
+.signin-card p.tagline {
+  color: var(--ink-500);
+  margin: 0 0 24px;
+  font-size: 14px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+
+.field label {
+  font-size: 13px;
+  color: var(--ink-300);
+}
+
+.field input {
+  background: var(--navy-950);
+  border: 1px solid var(--navy-700);
+  border-radius: 8px;
+  color: var(--ink-100);
+  padding: 11px 12px;
+}
+
+.field input:focus {
+  outline: 2px solid var(--gold-400);
+  outline-offset: -1px;
+}
+
+.btn-primary {
+  width: 100%;
+  background: var(--gold-400);
+  color: var(--navy-950);
+  font-weight: 600;
+  padding: 12px;
+  transition: filter 0.15s;
+}
+
+.btn-primary:hover:not(:disabled) {
+  filter: brightness(1.08);
+}
+
+.btn-primary:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+
+.hint {
+  margin-top: 18px;
+  font-size: 13px;
+  color: var(--ink-500);
+  background: var(--navy-950);
+  border: 1px dashed var(--navy-700);
+  border-radius: 8px;
+  padding: 10px 12px;
+  line-height: 1.5;
+}
+
+.hint code {
+  color: var(--gold-300);
+}
+
+/* ---------- layout ---------- */
+
+.main-grid {
+  display: grid;
+  grid-template-columns: 1fr 360px;
+  gap: 24px;
+  align-items: start;
+}
+
+.section-title {
+  font-size: 15px;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--ink-500);
+  margin: 0 0 14px;
+}
+
+/* ---------- rooms ---------- */
+
+.rooms-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.room-card {
+  background: var(--navy-800);
+  border: 1px solid var(--navy-700);
+  border-radius: var(--radius);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.room-card h3 {
+  margin: 0;
+  font-size: 17px;
+  color: var(--ink-100);
+}
+
+.room-card .desc {
+  color: var(--ink-500);
+  font-size: 13px;
+  min-height: 32px;
+}
+
+.room-price {
+  color: var(--gold-300);
+  font-size: 15px;
+}
+
+.room-price small {
+  color: var(--ink-500);
+}
+
+.room-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 6px;
+  gap: 10px;
+}
+
+.nights-select {
+  background: var(--navy-950);
+  color: var(--ink-100);
+  border: 1px solid var(--navy-700);
+  border-radius: 8px;
+  padding: 8px 10px;
+}
+
+.btn-book {
+  background: var(--navy-700);
+  color: var(--ink-100);
+  padding: 9px 16px;
+  font-weight: 600;
+  border: 1px solid transparent;
+}
+
+.btn-book:hover {
+  border-color: var(--gold-400);
+}
+
+.stepup-note {
+  font-size: 12px;
+  color: var(--gold-300);
+}
+
+/* ---------- bookings ---------- */
+
+.booking-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.booking-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--navy-800);
+  border: 1px solid var(--navy-700);
+  border-radius: 10px;
+  padding: 12px 16px;
+  font-size: 14px;
+}
+
+.booking-meta {
+  color: var(--ink-500);
+  font-size: 12px;
+}
+
+.badge {
+  font-size: 11px;
+  padding: 3px 9px;
+  border-radius: 999px;
+  letter-spacing: 0.4px;
+}
+
+.badge.verified {
+  background: rgba(93, 187, 138, 0.15);
+  color: var(--green-400);
+  border: 1px solid rgba(93, 187, 138, 0.4);
+}
+
+.badge.standard {
+  background: var(--navy-700);
+  color: var(--ink-300);
+}
+
+.empty {
+  color: var(--ink-500);
+  font-size: 14px;
+  padding: 12px 0;
+}
+
+/* ---------- sidebar ---------- */
+
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  position: sticky;
+  top: 20px;
+}
+
+.panel {
+  background: var(--navy-800);
+  border: 1px solid var(--navy-700);
+  border-radius: var(--radius);
+  padding: 18px;
+}
+
+.panel h2 {
+  margin: 0 0 12px;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--ink-500);
+}
+
+.event-log {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: 320px;
+  overflow-y: auto;
+  font-size: 13px;
+}
+
+.event-row {
+  border-left: 2px solid var(--navy-700);
+  padding-left: 10px;
+}
+
+.event-row .actor {
+  font-size: 11px;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+}
+
+.event-row .actor.Browser {
+  color: var(--ink-500);
+}
+
+.event-row .actor.Cognito {
+  color: var(--gold-300);
+}
+
+.event-row .actor.BookingAPI {
+  color: var(--green-400);
+}
+
+.event-row .title {
+  color: var(--ink-100);
+}
+
+.event-row .detail {
+  color: var(--ink-500);
+  font-size: 12px;
+}
+
+/* ---------- inbox (mock mode) ---------- */
+
+.inbox-mail {
+  background: var(--navy-950);
+  border: 1px solid var(--navy-700);
+  border-radius: 10px;
+  padding: 12px 14px;
+  margin-bottom: 10px;
+  font-size: 13px;
+}
+
+.inbox-mail .subject {
+  color: var(--ink-100);
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.inbox-mail .otp {
+  color: var(--gold-300);
+  font-size: 20px;
+  letter-spacing: 6px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- step-up modal ---------- */
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(5, 10, 20, 0.72);
+  display: grid;
+  place-items: center;
+  z-index: 20;
+}
+
+.modal {
+  width: 420px;
+  background: var(--navy-800);
+  border: 1px solid var(--navy-700);
+  border-radius: var(--radius);
+  padding: 30px;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.5);
+}
+
+.modal h2 {
+  margin: 0 0 6px;
+  font-size: 19px;
+  color: var(--gold-300);
+}
+
+.modal p {
+  color: var(--ink-300);
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+.otp-input {
+  width: 100%;
+  text-align: center;
+  font-size: 28px;
+  letter-spacing: 12px;
+  padding: 12px;
+  background: var(--navy-950);
+  border: 1px solid var(--navy-700);
+  border-radius: 10px;
+  color: var(--ink-100);
+  margin: 14px 0;
+}
+
+.otp-input:focus {
+  outline: 2px solid var(--gold-400);
+  outline-offset: -1px;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.btn-ghost {
+  flex: 1;
+  background: transparent;
+  border: 1px solid var(--navy-700);
+  color: var(--ink-300);
+  padding: 11px;
+}
+
+.modal-actions .btn-primary {
+  flex: 2;
+}
+
+.error-text {
+  color: var(--red-400);
+  font-size: 13px;
+  margin: 6px 0 0;
+}
+
+.success-text {
+  color: var(--green-400);
+  font-size: 13px;
+  margin: 6px 0 0;
+}
+
+/* ---------- toast ---------- */
+
+.toast {
+  position: fixed;
+  bottom: 26px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--navy-700);
+  border: 1px solid var(--gold-400);
+  color: var(--ink-100);
+  border-radius: 10px;
+  padding: 12px 22px;
+  font-size: 14px;
+  z-index: 30;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.45);
+}
+
+.demo-banner {
+  background: rgba(217, 179, 106, 0.12);
+  border: 1px solid rgba(217, 179, 106, 0.35);
+  color: var(--gold-300);
+  border-radius: 10px;
+  padding: 10px 16px;
+  font-size: 13px;
+  margin-bottom: 22px;
+  line-height: 1.5;
+}
