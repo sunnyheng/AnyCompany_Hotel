@@ -61,16 +61,20 @@ resources.
 cd backend && npm install && npm test   # 29 unit tests, node --test
 ```
 
-## Deploying the real stack
+## Deploying the real stack (one command)
 
 ```bash
-cd infra
-npm install
-npx cdk deploy            # requires bootstrapped AWS account/region
+./scripts/deploy.sh you@example.com 'YourPass#2026x'
 ```
 
-Then follow [`docs/PORTING_GUIDE.md`](docs/PORTING_GUIDE.md#running-the-demo-ui-against-a-deployed-stack)
-to point the web app at the deployed Cognito user pool and API.
+This bootstraps CDK if needed, deploys the stack, seeds the demo user, and
+writes `web/.env.local` from the stack outputs — after which `npm run dev` in
+`web/` starts in **live mode** against real Cognito. Optional knobs via env:
+`STEP_UP_THRESHOLD`, `SES_FROM_ADDRESS` (real OTP emails), `WEB_ORIGIN`.
+Tear down with `./scripts/destroy.sh`.
+
+Manual step-by-step equivalents are in
+[`docs/PORTING_GUIDE.md`](docs/PORTING_GUIDE.md#1-run-the-reference-as-is).
 
 ## Architecture at a glance
 
