@@ -44,6 +44,23 @@ threshold triggers the step-up OTP dialog. The simulated "email inbox" panel sho
 the OTP so the whole flow can be demonstrated end to end without any cloud
 resources.
 
+### Suggested demo script (≈3 minutes)
+
+1. Sign in — the event log shows `USER_PASSWORD_AUTH` and the primary tokens.
+2. Book the **Standard King, 1 night ($180)** — created instantly, badge "standard".
+3. Book the **Presidential Suite ($1500)** — the API answers `403 step_up_required`
+   and the verification dialog opens.
+4. Enter a wrong code once — "2 attempts left" (the 3-attempt lockout is real).
+5. Read the 6-digit code from the simulated inbox, enter it — fresh tokens are
+   issued, the booking retries automatically and lands with a
+   **step-up verified** badge.
+
+## Running the tests
+
+```bash
+cd backend && npm install && npm test   # 29 unit tests, node --test
+```
+
 ## Deploying the real stack
 
 ```bash
