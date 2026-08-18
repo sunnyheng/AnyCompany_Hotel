@@ -20,7 +20,11 @@ import type {
 import type { AuthService, BookingService, StepUpChallenge } from './types';
 import { logEvent } from './types';
 
-const client = new CognitoIdentityProviderClient({ region: config.region });
+// Instantiated lazily: this module is also imported in mock mode (where no
+// region is configured), and the SDK client constructor throws without one.
+let cognitoClient: CognitoIdentityProviderClient | null = null;
+const client = () =>
+  (cognitoClient ??= new CognitoIdentityProviderClient({ region: config.region }));
 
 const MAX_ATTEMPTS = 3;
 
@@ -41,7 +45,7 @@ let pending: PendingChallenge | null = null;
 export const liveAuth: AuthService = {
   async signIn(email, password) {
     logEvent('Browser', 'InitiateAuth (USER_PASSWORD_AUTH)', email);
-    const result = await client.send(
+    const result = await client().send(
       new InitiateAuthCommand({
         AuthFlow: 'USER_PASSWORD_AUTH',
         ClientId: config.userPoolClientId,
@@ -63,7 +67,7 @@ export const liveAuth: AuthService = {
 
   async startStepUp(session): Promise<StepUpChallenge> {
     logEvent('Browser', 'InitiateAuth (CUSTOM_AUTH)', session.email);
-    const result = await client.send(
+    const result = await client().send(
       new InitiateAuthCommand({
         AuthFlow: 'CUSTOM_AUTH',
         ClientId: config.userPoolClientId,
@@ -85,7 +89,7 @@ export const liveAuth: AuthService = {
     }
     logEvent('Browser', 'RespondToAuthChallenge', 'ANSWER submitted');
     try {
-      const result = await client.send(
+      const result = await client().send(
         new RespondToAuthChallengeCommand({
           ClientId: config.userPoolClientId,
           ChallengeName: 'CUSTOM_CHALLENGE',
