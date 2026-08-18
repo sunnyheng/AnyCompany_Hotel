@@ -7,6 +7,7 @@ import Rooms, { BookingRequest } from './components/Rooms';
 import Bookings from './components/Bookings';
 import StepUpModal from './components/StepUpModal';
 import EventLog from './components/EventLog';
+import InboxPanel from './components/InboxPanel';
 
 export default function App() {
   const [session, setSession] = useState<Session | null>(null);
@@ -84,6 +85,15 @@ export default function App() {
         </div>
       </header>
 
+      {config.mode === 'mock' && (
+        <div className="demo-banner">
+          Running in <strong>mock mode</strong> — the entire flow (including the OTP email) is
+          simulated in the browser. Deploy the CDK stack and fill in <code>web/.env.local</code>{' '}
+          to run against real Cognito. Bookings above <strong>${config.stepUpThreshold}</strong>{' '}
+          require step-up verification.
+        </div>
+      )}
+
       <div className="main-grid">
         <main>
           <Rooms onBook={onBook} busy={busy} />
@@ -91,6 +101,7 @@ export default function App() {
         </main>
         <aside className="sidebar">
           <EventLog />
+          {config.mode === 'mock' && <InboxPanel />}
         </aside>
       </div>
 
