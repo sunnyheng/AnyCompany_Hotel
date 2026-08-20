@@ -18,6 +18,7 @@ Tracks the build against the task breakdown in `docs/REQUIREMENTS.md` §5.
 | T12 | Hosted demo UI on CloudFront | ✅ Done (2026-08-20) | Private S3 origin, published by deploy.sh |
 | T13 | Security & compliance notes | ✅ Done (2026-08-18) | 7 accepted risks documented |
 | T14 | Handoff docs + final README | ✅ Done (2026-08-18) | Porting guide, next steps |
+| T15 | Email self sign-up (register + confirm) | ✅ Done (2026-08-20) | Cognito default email channel, code confirmation |
 
 ## Still open (post-build)
 

@@ -39,7 +39,9 @@ enrichment and concierge desk override).
 One command deploys the whole stack into the current AWS account/region and
 prints a public **CloudFront URL** for the demo UI plus the seeded demo user's
 credentials. Open the URL, sign in, book a room — any booking over the
-threshold triggers the step-up OTP dialog.
+threshold triggers the step-up OTP dialog. Visitors can also **register their
+own account** from the sign-in page (Cognito emails a verification code, no
+SES setup needed).
 
 ### Suggested demo script (≈3 minutes)
 

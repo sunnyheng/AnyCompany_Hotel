@@ -38,6 +38,7 @@ further AWS involvement.
 | FR-9 | A user can list their own bookings (and only their own). |
 | FR-10 | The demo UI walks through the entire flow visually, including an event log of every auth interaction, suitable for a customer demo. |
 | FR-11 | The demo UI runs against the deployed stack and is published to a public CloudFront URL by the deploy script, so the flow can be demonstrated from any browser. |
+| FR-12 | A visitor can register an account with their own email address, confirmed by an emailed verification code, and then sign in without operator involvement. |
 
 ## 3. Non-functional requirements
 
