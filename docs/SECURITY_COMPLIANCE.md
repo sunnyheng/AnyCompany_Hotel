@@ -9,7 +9,8 @@ ASH for code, Holmes for docs): findings that are not fixed are explained here.
 
 | Area | Position |
 | --- | --- |
-| Network exposure | Serverless only. The only reachable endpoints are Amazon Cognito's managed API and one API Gateway HTTP API protected by a Cognito JWT authorizer. No EC2, no security groups, no open ports, no S3 buckets. |
+| Network exposure | Serverless only. The reachable endpoints are Amazon Cognito's managed API, one API Gateway HTTP API protected by a Cognito JWT authorizer, and one CloudFront distribution serving the static demo UI. No EC2, no security groups, no open ports. |
+| Static assets | The demo UI lives in a single S3 bucket with **all four Block Public Access settings enabled**, default encryption (SSE-S3) and an enforce-SSL bucket policy; it is readable only by the CloudFront distribution via Origin Access Control (sigv4, `AWS:SourceArn` condition). Viewers are redirected to HTTPS. |
 | Data at rest | DynamoDB table encrypted with an AWS-managed KMS key. No PII beyond the seeded demo user's email; bookings are synthetic demo data. |
 | Data in transit | TLS everywhere (Cognito, API Gateway, DynamoDB endpoints). |
 | Identity | All API access requires a valid user-pool JWT; high-value writes additionally require a second, fresh JWT obtained through the OTP challenge (step-up). |
@@ -71,15 +72,36 @@ tier and unnecessary for a synthetic-data reference.
 **Production path:** enable the Plus feature plan on the production pool; it
 composes cleanly with custom auth challenges.
 
-### R-7 — CORS allows a configurable single origin (default `http://localhost:5173`)
+### R-7 — CORS allows the CloudFront origin plus one configurable dev origin
 
-**Why accepted:** the demo UI runs locally; the origin is a deploy-time context
-parameter (`-c webOrigin=...`), never `*`.
+The API allows exactly two origins: the stack's own CloudFront distribution
+(where the demo UI is hosted) and a deploy-time context parameter
+(`-c webOrigin=...`, default `http://localhost:5173`) for local development.
+**Why accepted:** never `*`; both origins are known and controlled.
+**Production path:** drop the localhost origin.
+
+### R-8 — Demo UI is publicly reachable on the default CloudFront domain
+
+Anyone with the URL can load the static assets (HTML/JS/CSS). The bundle
+contains the Cognito user pool / app client IDs and the API URL — all values
+that are public by design in any SPA — and no secrets. Every API call still
+requires a valid user-pool JWT, self sign-up is disabled, and high-value writes
+require step-up.
+**Why accepted:** a customer-facing demo must be reachable without local
+tooling; the S3 origin itself remains fully private (Block Public Access +
+OAC-only reads).
+**Production path:** custom domain + ACM certificate, AWS WAF on the
+distribution, and (if the audience must be restricted) CloudFront signed
+cookies or an IP allowlist via WAF.
 
 ## Alignment with organizational AWS baselines
 
-- **No storage service is publicly exposed** — there are no S3 buckets at all;
-  DynamoDB is reachable only via IAM from the booking Lambda.
+- **No storage service is publicly exposed** — the single S3 bucket has all
+  four Block Public Access settings enabled and is readable only by CloudFront
+  via Origin Access Control; DynamoDB is reachable only via IAM from the
+  booking Lambda.
+- **Web traffic enters through CloudFront** — never directly against storage
+  or compute.
 - **No ports are opened** — no security groups exist in the stack.
 - **No EC2 / SSH / RDP surface** — compute is Lambda only.
 

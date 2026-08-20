@@ -67,10 +67,13 @@ cd backend && npm install && npm test   # 29 unit tests, node --test
 ./scripts/deploy.sh you@example.com 'YourPass#2026x'
 ```
 
-This bootstraps CDK if needed, deploys the stack, seeds the demo user, and
-writes `web/.env.local` from the stack outputs — after which `npm run dev` in
-`web/` starts in **live mode** against real Cognito. Optional knobs via env:
-`STEP_UP_THRESHOLD`, `SES_FROM_ADDRESS` (real OTP emails), `WEB_ORIGIN`.
+This bootstraps CDK if needed, deploys the stack, seeds the demo user, builds
+the web UI and publishes it to **CloudFront** (private S3 origin, Block Public
+Access on, OAC-only reads) — the script prints the `https://…cloudfront.net`
+demo URL at the end, ready to share with an audience. It also writes
+`web/.env.local`, so `npm run dev` in `web/` runs the same **live mode**
+locally. Optional knobs via env: `STEP_UP_THRESHOLD`, `SES_FROM_ADDRESS`
+(real OTP emails), `WEB_ORIGIN` (extra CORS origin for local dev).
 Tear down with `./scripts/destroy.sh`.
 
 Manual step-by-step equivalents are in
@@ -79,7 +82,7 @@ Manual step-by-step equivalents are in
 ## Architecture at a glance
 
 ```
-Browser (React SPA)
+Browser (React SPA, served by CloudFront ◄── private S3 bucket, OAC)
   │ 1. USER_PASSWORD_AUTH sign-in            ┌─────────────────────────────┐
   ├──────────────────────────────────────────►  Amazon Cognito User Pool    │
   │ 4. CUSTOM_AUTH step-up (OTP)             │  ├─ DefineAuthChallenge λ    │
