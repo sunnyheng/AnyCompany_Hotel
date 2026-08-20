@@ -43,6 +43,10 @@ threshold triggers the step-up OTP dialog. Visitors can also **register their
 own account** from the sign-in page (Cognito emails a verification code, no
 SES setup needed).
 
+The room catalog and the step-up threshold live in DynamoDB (seeded by the
+deploy script). Signing in as the seeded **admin user** reveals an admin panel
+that changes the threshold at runtime — no redeploy needed.
+
 ### Suggested demo script (≈3 minutes)
 
 1. Sign in — the event log shows `USER_PASSWORD_AUTH` and the primary tokens.
@@ -54,6 +58,8 @@ SES setup needed).
    the CreateAuthChallenge Lambda's CloudWatch log group, enter it — fresh tokens
    are issued, the booking retries automatically and lands with a
    **step-up verified** badge.
+6. Sign in as the admin user and change the threshold in the **Admin panel** —
+   book again as a regular user to show the new policy applying instantly.
 
 ## Running the tests
 
@@ -72,9 +78,10 @@ builds the web UI and publishes it to **CloudFront** (private S3 origin, Block
 Public Access on, OAC-only reads) — it prints the `https://…cloudfront.net`
 demo URL at the end, ready to share with an audience. It also writes
 `web/.env.local`, so `npm run dev` in `web/` runs the same UI locally against
-the deployed stack. Optional knobs via env: `STEP_UP_THRESHOLD`,
-`SES_FROM_ADDRESS` (real OTP emails), `WEB_ORIGIN` (extra CORS origin for
-local dev). Tear down with `./scripts/destroy.sh`.
+the deployed stack. Optional knobs via env: `STEP_UP_THRESHOLD` (fallback
+default until an admin sets one), `SES_FROM_ADDRESS` (real OTP emails),
+`WEB_ORIGIN` (extra CORS origin for local dev), `ADMIN_EMAIL`/`ADMIN_PASSWORD`
+(seeded admin account). Tear down with `./scripts/destroy.sh`.
 
 Manual step-by-step equivalents are in
 [`docs/PORTING_GUIDE.md`](docs/PORTING_GUIDE.md#1-run-the-reference-as-is).

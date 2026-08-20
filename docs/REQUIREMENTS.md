@@ -39,6 +39,8 @@ further AWS involvement.
 | FR-10 | The demo UI walks through the entire flow visually, including an event log of every auth interaction, suitable for a customer demo. |
 | FR-11 | The demo UI runs against the deployed stack and is published to a public CloudFront URL by the deploy script, so the flow can be demonstrated from any browser. |
 | FR-12 | A visitor can register an account with their own email address, confirmed by an emailed verification code, and then sign in without operator involvement. |
+| FR-13 | The room catalog and step-up threshold are stored in DynamoDB; booking amounts are computed server-side from the catalog, never taken from the client. |
+| FR-14 | A member of the `admins` group can update the step-up threshold from an admin panel in the demo UI, taking effect immediately without redeployment. |
 
 ## 3. Non-functional requirements
 

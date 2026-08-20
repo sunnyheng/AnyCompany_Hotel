@@ -19,6 +19,8 @@ Tracks the build against the task breakdown in `docs/REQUIREMENTS.md` §5.
 | T13 | Security & compliance notes | ✅ Done (2026-08-18) | 7 accepted risks documented |
 | T14 | Handoff docs + final README | ✅ Done (2026-08-18) | Porting guide, next steps |
 | T15 | Email self sign-up (register + confirm) | ✅ Done (2026-08-20) | Cognito default email channel, code confirmation |
+| T16 | Catalog + threshold in DynamoDB, server-side pricing | ✅ Done (2026-08-20) | CONFIG partition; client sends roomId+nights only |
+| T17 | Admin threshold panel (admins group) | ✅ Done (2026-08-20) | PUT /admin/threshold, group-checked in Lambda |
 
 ## Still open (post-build)
 

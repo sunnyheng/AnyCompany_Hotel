@@ -128,3 +128,29 @@ became publicly hosted on CloudFront — the hosted live flow covers every demo
 scenario, and dropping the mock removes the drift risk. The narrow
 `AuthService`/`BookingService` seams remain, so a mock can be reintroduced
 without touching the UI.
+
+---
+
+## ADR-008: Pricing and the step-up threshold live in DynamoDB, priced server-side
+
+**Context.** The room catalog was hardcoded in the SPA and the booking amount
+was computed in the browser and trusted by the API — a client bypassing the UI
+could understate the amount and dodge the step-up policy. The threshold was a
+deploy-time constant, so changing it required a redeploy.
+
+**Decision.** The bookings table gains a `CONFIG` partition holding the room
+catalog (`ROOM#<id>`) and the step-up threshold (`THRESHOLD`). `POST /bookings`
+accepts only `{ roomId, nights }` and prices the booking server-side from the
+catalog; `GET /config` serves the catalog and current threshold to the UI; and
+`PUT /admin/threshold` lets members of the Cognito `admins` group change the
+threshold at runtime (enforced in the Lambda from the JWT's `cognito:groups`
+claim). The `STEP_UP_THRESHOLD` environment value remains only as the fallback
+default until an admin sets one.
+
+**Alternatives rejected.**
+- *Keep client-side amounts, validate ranges*: still trusts the client for the
+  security-relevant number.
+- *Separate config table / AppConfig*: more moving parts than a demo needs;
+  the single-table CONFIG partition keeps IAM grants unchanged.
+- *IAM-authorized admin API route*: a second auth scheme on one API; Cognito
+  groups keep the whole demo on one identity model.
