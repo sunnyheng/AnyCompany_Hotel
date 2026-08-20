@@ -3,6 +3,7 @@ import type {
   Booking,
   BookingInput,
   CreateBookingResult,
+  RemoteConfig,
   Session,
   StepUpAnswerResult,
   StepUpProof,
@@ -31,8 +32,12 @@ export interface AuthService {
 }
 
 export interface BookingService {
+  /** Room catalog + current step-up threshold, from the API's CONFIG data. */
+  getConfig(session: Session): Promise<RemoteConfig>;
   list(session: Session): Promise<Booking[]>;
   create(session: Session, input: BookingInput, proof?: StepUpProof): Promise<CreateBookingResult>;
+  /** Admins only (the API enforces the group): set a new step-up threshold. */
+  updateThreshold(session: Session, threshold: number): Promise<number>;
 }
 
 type Listener<T> = (items: T[]) => void;

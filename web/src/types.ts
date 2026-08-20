@@ -4,6 +4,8 @@ export interface Session {
   email: string;
   /** Cognito subject. */
   sub: string;
+  /** Cognito group memberships from the ID token (display/routing only — the API re-checks). */
+  groups: string[];
   idToken: string;
   accessToken: string;
 }
@@ -32,12 +34,19 @@ export interface Booking {
   createdAt: string;
 }
 
+/**
+ * What the client is allowed to say about a booking. The amount is priced
+ * server-side from the room catalog, so it cannot be tampered with.
+ */
 export interface BookingInput {
   roomId: string;
-  roomName: string;
   nights: number;
-  amount: number;
-  currency: string;
+}
+
+/** Room catalog and step-up threshold, served by GET /config from DynamoDB. */
+export interface RemoteConfig {
+  rooms: Room[];
+  threshold: number;
 }
 
 export type CreateBookingResult =
@@ -58,29 +67,3 @@ export interface AuthEvent {
   detail?: string;
 }
 
-export const ROOMS: Room[] = [
-  {
-    id: 'standard',
-    name: 'Standard King',
-    description: 'City view, king bed, workspace',
-    pricePerNight: 180,
-  },
-  {
-    id: 'deluxe',
-    name: 'Deluxe Terrace',
-    description: 'Private terrace, marble bath',
-    pricePerNight: 320,
-  },
-  {
-    id: 'executive',
-    name: 'Executive Suite',
-    description: 'Separate living room, lounge access',
-    pricePerNight: 780,
-  },
-  {
-    id: 'presidential',
-    name: 'Presidential Suite',
-    description: 'Panoramic floor, butler service',
-    pricePerNight: 1500,
-  },
-];

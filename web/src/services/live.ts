@@ -15,6 +15,7 @@ import type {
   Booking,
   BookingInput,
   CreateBookingResult,
+  RemoteConfig,
   Session,
   StepUpAnswerResult,
   StepUpProof,
@@ -59,9 +60,13 @@ export const liveAuth: AuthService = {
       throw new Error('Unexpected challenge during primary sign-in.');
     }
     logEvent('Cognito', 'Tokens issued', 'ID + access + refresh (primary session)');
+    const payload = jwtPayload(auth.IdToken);
     return {
       email,
-      sub: String(jwtPayload(auth.IdToken).sub),
+      sub: String(payload.sub),
+      groups: Array.isArray(payload['cognito:groups'])
+        ? (payload['cognito:groups'] as string[])
+        : [],
       idToken: auth.IdToken,
       accessToken: auth.AccessToken,
     };
@@ -148,7 +153,8 @@ export const liveAuth: AuthService = {
 
 const api = async (
   session: Session,
-  method: 'GET' | 'POST',
+  method: 'GET' | 'POST' | 'PUT',
+  path: string,
   body?: unknown,
   proof?: StepUpProof,
 ): Promise<{ status: number; data: any }> => {
@@ -157,7 +163,7 @@ const api = async (
     'content-type': 'application/json',
   };
   if (proof) headers['x-step-up-token'] = proof.token;
-  const response = await fetch(`${config.apiUrl}/bookings`, {
+  const response = await fetch(`${config.apiUrl}${path}`, {
     method,
     headers,
     body: body === undefined ? undefined : JSON.stringify(body),
@@ -166,15 +172,21 @@ const api = async (
 };
 
 export const liveBookings: BookingService = {
+  async getConfig(session): Promise<RemoteConfig> {
+    const { status, data } = await api(session, 'GET', '/config');
+    if (status !== 200) throw new Error(`Failed to load configuration (${status})`);
+    return { rooms: data.rooms, threshold: data.threshold };
+  },
+
   async list(session): Promise<Booking[]> {
-    const { status, data } = await api(session, 'GET');
+    const { status, data } = await api(session, 'GET', '/bookings');
     if (status !== 200) throw new Error(`Failed to list bookings (${status})`);
     return data.bookings;
   },
 
   async create(session, input: BookingInput, proof?: StepUpProof): Promise<CreateBookingResult> {
-    logEvent('Browser', 'POST /bookings', `${input.roomName}, $${input.amount}`);
-    const { status, data } = await api(session, 'POST', input, proof);
+    logEvent('Browser', 'POST /bookings', `${input.roomId} × ${input.nights} night(s)`);
+    const { status, data } = await api(session, 'POST', '/bookings', input, proof);
     if (status === 201) {
       logEvent('Booking API', '201 booking created', data.booking.id.slice(0, 8));
       return { status: 'created', booking: data.booking };
@@ -188,5 +200,13 @@ export const liveBookings: BookingService = {
       return { status: 'step_up_rejected', reason: data.message ?? 'Step-up token rejected.' };
     }
     throw new Error(data.message ?? `Booking failed (${status})`);
+  },
+
+  async updateThreshold(session, threshold): Promise<number> {
+    logEvent('Browser', 'PUT /admin/threshold', `$${threshold}`);
+    const { status, data } = await api(session, 'PUT', '/admin/threshold', { threshold });
+    if (status !== 200) throw new Error(data.message ?? `Threshold update failed (${status})`);
+    logEvent('Booking API', 'Threshold updated', `Step-up now required above $${data.threshold}`);
+    return data.threshold;
   },
 };

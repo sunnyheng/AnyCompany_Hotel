@@ -1,17 +1,19 @@
 import { useCallback, useEffect, useState } from 'react';
 import { isConfigured } from './config';
-import type { Booking, BookingInput, Session, StepUpProof } from './types';
+import type { Booking, RemoteConfig, Session, StepUpProof } from './types';
 import { bookingApi } from './services';
 import SignIn from './components/SignIn';
 import Rooms, { BookingRequest } from './components/Rooms';
 import Bookings from './components/Bookings';
 import StepUpModal from './components/StepUpModal';
 import EventLog from './components/EventLog';
+import AdminPanel from './components/AdminPanel';
 
 export default function App() {
   const [session, setSession] = useState<Session | null>(null);
+  const [remote, setRemote] = useState<RemoteConfig | null>(null);
   const [bookings, setBookings] = useState<Booking[]>([]);
-  const [pendingBooking, setPendingBooking] = useState<BookingInput | null>(null);
+  const [pendingBooking, setPendingBooking] = useState<BookingRequest | null>(null);
   const [busy, setBusy] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
 
@@ -25,14 +27,23 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    if (session) void refresh(session);
+    if (!session) return;
+    bookingApi
+      .getConfig(session)
+      .then(setRemote)
+      .catch((err) => showToast((err as Error).message));
+    void refresh(session);
   }, [session, refresh]);
 
-  const submitBooking = async (input: BookingInput, proof?: StepUpProof) => {
+  const submitBooking = async (req: BookingRequest, proof?: StepUpProof) => {
     if (!session) return;
     setBusy(true);
     try {
-      const result = await bookingApi.create(session, input, proof);
+      const result = await bookingApi.create(
+        session,
+        { roomId: req.room.id, nights: req.nights },
+        proof,
+      );
       if (result.status === 'created') {
         setPendingBooking(null);
         showToast(
@@ -43,9 +54,9 @@ export default function App() {
         await refresh(session);
       } else if (result.status === 'step_up_required') {
         // The API refused: keep the request and open the step-up dialog.
-        setPendingBooking(input);
+        setPendingBooking(req);
       } else {
-        setPendingBooking(input);
+        setPendingBooking(req);
         showToast(result.reason);
       }
     } catch (err) {
@@ -54,15 +65,6 @@ export default function App() {
       setBusy(false);
     }
   };
-
-  const onBook = (req: BookingRequest) =>
-    void submitBooking({
-      roomId: req.room.id,
-      roomName: req.room.name,
-      nights: req.nights,
-      amount: req.total,
-      currency: 'USD',
-    });
 
   if (!isConfigured) {
     return (
@@ -84,6 +86,8 @@ export default function App() {
     return <SignIn onSignedIn={setSession} />;
   }
 
+  const isAdmin = session.groups.includes('admins');
+
   return (
     <div className="app-shell">
       <header className="header">
@@ -92,9 +96,16 @@ export default function App() {
           <span className="brand-sub">Hotels &amp; Resorts</span>
         </div>
         <div className="header-user">
-          <span className="mode-pill live">live mode</span>
+          <span className="mode-pill live">{isAdmin ? 'admin' : 'live mode'}</span>
           <span>{session.email}</span>
-          <button className="btn-ghost" onClick={() => setSession(null)}>
+          <button
+            className="btn-ghost"
+            onClick={() => {
+              setSession(null);
+              setRemote(null);
+              setBookings([]);
+            }}
+          >
             Sign out
           </button>
         </div>
@@ -102,10 +113,21 @@ export default function App() {
 
       <div className="main-grid">
         <main>
-          <Rooms onBook={onBook} busy={busy} />
+          {remote ? (
+            <Rooms rooms={remote.rooms} threshold={remote.threshold} onBook={(req) => void submitBooking(req)} busy={busy} />
+          ) : (
+            <h2 className="section-title">Loading room catalog…</h2>
+          )}
           <Bookings bookings={bookings} />
         </main>
         <aside className="sidebar">
+          {isAdmin && remote && (
+            <AdminPanel
+              session={session}
+              threshold={remote.threshold}
+              onThresholdChanged={(value) => setRemote({ ...remote, threshold: value })}
+            />
+          )}
           <EventLog />
         </aside>
       </div>
@@ -113,7 +135,7 @@ export default function App() {
       {pendingBooking && (
         <StepUpModal
           session={session}
-          amount={pendingBooking.amount}
+          amount={pendingBooking.total}
           onCancel={() => setPendingBooking(null)}
           onVerified={(proof) => void submitBooking(pendingBooking, proof)}
         />

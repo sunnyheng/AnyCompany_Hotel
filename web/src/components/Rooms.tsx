@@ -1,6 +1,5 @@
 import { useState } from 'react';
-import { config } from '../config';
-import { ROOMS, Room } from '../types';
+import { Room } from '../types';
 
 export interface BookingRequest {
   room: Room;
@@ -8,17 +7,27 @@ export interface BookingRequest {
   total: number;
 }
 
-export default function Rooms({ onBook, busy }: { onBook: (req: BookingRequest) => void; busy: boolean }) {
+export default function Rooms({
+  rooms,
+  threshold,
+  onBook,
+  busy,
+}: {
+  rooms: Room[];
+  threshold: number;
+  onBook: (req: BookingRequest) => void;
+  busy: boolean;
+}) {
   const [nights, setNights] = useState<Record<string, number>>({});
 
   return (
     <>
       <h2 className="section-title">Rooms — Grand Marina Property</h2>
       <div className="rooms-grid">
-        {ROOMS.map((room) => {
+        {rooms.map((room) => {
           const n = nights[room.id] ?? 1;
           const total = room.pricePerNight * n;
-          const needsStepUp = total > config.stepUpThreshold;
+          const needsStepUp = total > threshold;
           return (
             <div className="room-card" key={room.id}>
               <h3>{room.name}</h3>
