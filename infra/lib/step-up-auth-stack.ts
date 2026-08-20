@@ -106,6 +106,15 @@ export class StepUpAuthStack extends cdk.Stack {
       removalPolicy: cdk.RemovalPolicy.DESTROY,
     });
 
+    // Members may update runtime configuration (the step-up threshold) via
+    // the API's /admin routes; membership is asserted through the JWT's
+    // cognito:groups claim and enforced in the booking Lambda.
+    new cognito.CfnUserPoolGroup(this, 'AdminsGroup', {
+      userPoolId: userPool.userPoolId,
+      groupName: 'admins',
+      description: 'May update the step-up threshold via the admin API',
+    });
+
     const userPoolClient = userPool.addClient('WebClient', {
       userPoolClientName: 'stepup-demo-web',
       authFlows: {
@@ -180,7 +189,11 @@ export class StepUpAuthStack extends cdk.Stack {
       corsPreflight: {
         // The hosted demo UI plus the configurable local-dev origin.
         allowOrigins: [webUrl, props.webOrigin],
-        allowMethods: [apigwv2.CorsHttpMethod.GET, apigwv2.CorsHttpMethod.POST],
+        allowMethods: [
+          apigwv2.CorsHttpMethod.GET,
+          apigwv2.CorsHttpMethod.POST,
+          apigwv2.CorsHttpMethod.PUT,
+        ],
         allowHeaders: ['authorization', 'content-type', 'x-step-up-token'],
         maxAge: cdk.Duration.minutes(10),
       },
@@ -197,10 +210,25 @@ export class StepUpAuthStack extends cdk.Stack {
       integration,
       authorizer,
     });
+    httpApi.addRoutes({
+      path: '/config',
+      methods: [apigwv2.HttpMethod.GET],
+      integration,
+      authorizer,
+    });
+    // Group membership (admins) is enforced inside the Lambda from the
+    // JWT's cognito:groups claim.
+    httpApi.addRoutes({
+      path: '/admin/threshold',
+      methods: [apigwv2.HttpMethod.PUT],
+      integration,
+      authorizer,
+    });
 
     // --- Outputs consumed by web/.env and scripts --------------------------
 
     new cdk.CfnOutput(this, 'UserPoolId', { value: userPool.userPoolId });
+    new cdk.CfnOutput(this, 'TableName', { value: table.tableName });
     new cdk.CfnOutput(this, 'UserPoolClientId', { value: userPoolClient.userPoolClientId });
     new cdk.CfnOutput(this, 'ApiUrl', { value: httpApi.apiEndpoint });
     new cdk.CfnOutput(this, 'StepUpThreshold', { value: String(props.stepUpThreshold) });
