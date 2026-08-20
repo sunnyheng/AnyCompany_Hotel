@@ -37,7 +37,7 @@ further AWS involvement.
 | FR-8 | Step-up proof expires: a step-up token older than 5 minutes is not accepted for new high-value bookings. |
 | FR-9 | A user can list their own bookings (and only their own). |
 | FR-10 | The demo UI walks through the entire flow visually, including an event log of every auth interaction, suitable for a customer demo. |
-| FR-11 | The demo UI runs in **mock mode** with zero AWS dependencies so the flow can be demonstrated anywhere, and in **live mode** against a deployed stack via configuration only (no code change). |
+| FR-11 | The demo UI runs against the deployed stack and is published to a public CloudFront URL by the deploy script, so the flow can be demonstrated from any browser. |
 
 ## 3. Non-functional requirements
 
@@ -78,8 +78,9 @@ Each task maps to one or more commits, in this order:
    JWT authorizer, stack outputs; demo-user seed script.
 9. **T9 — Demo UI scaffold**: Vite + React app shell, routing, service interfaces.
 10. **T10 — Sign-in flow** in the demo UI.
-11. **T11 — Booking + step-up OTP flow** in the demo UI, including the simulated
-    inbox and the auth event log.
-12. **T12 — Mock mode** so the demo runs without AWS.
+11. **T11 — Booking + step-up OTP flow** in the demo UI, including the auth
+    event log.
+12. **T12 — Hosted demo UI**: published to CloudFront (private S3 origin) by
+    the deploy script.
 13. **T13 — Security & compliance notes**: scan-response document.
 14. **T14 — Handoff docs**: porting guide, next steps, progress log, final README.

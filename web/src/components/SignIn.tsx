@@ -1,10 +1,9 @@
 import { FormEvent, useState } from 'react';
-import { config } from '../config';
 import type { Session } from '../types';
 import { auth } from '../services';
 
 export default function SignIn({ onSignedIn }: { onSignedIn: (session: Session) => void }) {
-  const [email, setEmail] = useState(config.mode === 'mock' ? 'demo@anycompany.example' : '');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -53,12 +52,6 @@ export default function SignIn({ onSignedIn }: { onSignedIn: (session: Session) 
         <button className="btn-primary" disabled={busy}>
           {busy ? 'Signing in…' : 'Sign in'}
         </button>
-        {config.mode === 'mock' && (
-          <div className="hint">
-            Mock mode — sign in with <code>demo@anycompany.example</code> /{' '}
-            <code>Demo#Pass1</code>. No AWS resources are used.
-          </div>
-        )}
       </form>
     </div>
   );

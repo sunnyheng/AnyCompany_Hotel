@@ -12,10 +12,10 @@ Tracks the build against the task breakdown in `docs/REQUIREMENTS.md` §5.
 | T6 | VerifyAuthChallengeResponse Lambda | ✅ Done (2026-08-18) | Constant-time compare; 7 unit tests |
 | T7 | Booking API Lambda | ✅ Done (2026-08-18) | 11 unit tests incl. expired/foreign token |
 | T8 | CDK stack + seed script | ✅ Done (2026-08-18) | `cdk synth` + `tsc` clean |
-| T9 | Demo UI scaffold | ✅ Done (2026-08-18) | Vite + React + TS, mode selection |
-| T10 | Service layer (mock + live) | ✅ Done (2026-08-18) | Behaviorally matched implementations |
+| T9 | Demo UI scaffold | ✅ Done (2026-08-18) | Vite + React + TS |
+| T10 | Service layer | ✅ Done (2026-08-18) | Narrow AuthService/BookingService seams |
 | T11 | Sign-in / booking / step-up UI | ✅ Done (2026-08-18) | Event log narrates the flow |
-| T12 | Simulated inbox + demo banner | ✅ Done (2026-08-18) | Full offline demo path |
+| T12 | Hosted demo UI on CloudFront | ✅ Done (2026-08-20) | Private S3 origin, published by deploy.sh |
 | T13 | Security & compliance notes | ✅ Done (2026-08-18) | 7 accepted risks documented |
 | T14 | Handoff docs + final README | ✅ Done (2026-08-18) | Porting guide, next steps |
 
@@ -30,4 +30,4 @@ Tracks the build against the task breakdown in `docs/REQUIREMENTS.md` §5.
 
 - `backend`: `npm test` → 29/29 passing
 - `infra`: `npx cdk synth` and `npx tsc --noEmit` → clean
-- `web`: `npm run build` (includes type-check) → clean; mock-mode demo exercised manually
+- `web`: `npm run build` (includes type-check) → clean; hosted demo exercised manually against the deployed stack

@@ -33,7 +33,6 @@ What comes after the reference is delivered. Grouped by owner.
 
 | Item | Impact | Suggested fix |
 | --- | --- | --- |
-| Mock mode duplicates backend policy logic in the browser | Drift risk between demo and Lambdas | Extract the thresholds/window into a shared JSON consumed by both, or accept and re-verify at each backend change |
 | OTP email is plain text, English only | Cosmetic for demo | Use templated, localized SES emails in production |
 | No refresh-token rotation handling in the SPA | Long demos may hit token expiry (1 h) | Sign in again, or add refresh flow when porting |
 | `web` has no automated tests | UI regressions surface manually | Add Playwright coverage of the two demo paths if the SPA is kept beyond demo use |

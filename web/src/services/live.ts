@@ -20,8 +20,8 @@ import type {
 import type { AuthService, BookingService, StepUpChallenge } from './types';
 import { logEvent } from './types';
 
-// Instantiated lazily: this module is also imported in mock mode (where no
-// region is configured), and the SDK client constructor throws without one.
+// Instantiated lazily: the module can be imported before configuration is
+// checked, and the SDK client constructor throws without a region.
 let cognitoClient: CognitoIdentityProviderClient | null = null;
 const client = () =>
   (cognitoClient ??= new CognitoIdentityProviderClient({ region: config.region }));

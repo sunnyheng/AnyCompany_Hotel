@@ -1,10 +1,9 @@
 /**
- * Runtime configuration. When all Cognito/API settings are present the app
- * runs in "live" mode against a deployed stack; otherwise it falls back to
- * "mock" mode, an in-browser simulation of the exact same flow (ADR-007).
+ * Runtime configuration for the deployed stack. Values are baked in at build
+ * time from `web/.env.local`, which `scripts/deploy.sh` writes from the CDK
+ * stack outputs.
  */
 export interface AppConfig {
-  mode: 'live' | 'mock';
   region: string;
   userPoolId: string;
   userPoolClientId: string;
@@ -14,12 +13,12 @@ export interface AppConfig {
 
 const env = import.meta.env;
 
-const hasLiveConfig = Boolean(
+/** True when all Cognito/API settings are present. */
+export const isConfigured = Boolean(
   env.VITE_AWS_REGION && env.VITE_USER_POOL_ID && env.VITE_USER_POOL_CLIENT_ID && env.VITE_API_URL,
 );
 
 export const config: AppConfig = {
-  mode: hasLiveConfig ? 'live' : 'mock',
   region: env.VITE_AWS_REGION ?? '',
   userPoolId: env.VITE_USER_POOL_ID ?? '',
   userPoolClientId: env.VITE_USER_POOL_CLIENT_ID ?? '',

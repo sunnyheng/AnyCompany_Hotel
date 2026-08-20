@@ -1,8 +1,8 @@
-/** Shared domain types used by both the mock and live service implementations. */
+/** Shared domain types used by the UI and the service layer. */
 
 export interface Session {
   email: string;
-  /** Cognito subject; synthetic in mock mode. */
+  /** Cognito subject. */
   sub: string;
   idToken: string;
   accessToken: string;

@@ -386,30 +386,6 @@ input {
   font-size: 12px;
 }
 
-/* ---------- inbox (mock mode) ---------- */
-
-.inbox-mail {
-  background: var(--navy-950);
-  border: 1px solid var(--navy-700);
-  border-radius: 10px;
-  padding: 12px 14px;
-  margin-bottom: 10px;
-  font-size: 13px;
-}
-
-.inbox-mail .subject {
-  color: var(--ink-100);
-  font-weight: 600;
-  margin-bottom: 4px;
-}
-
-.inbox-mail .otp {
-  color: var(--gold-300);
-  font-size: 20px;
-  letter-spacing: 6px;
-  font-variant-numeric: tabular-nums;
-}
-
 /* ---------- step-up modal ---------- */
 
 .modal-backdrop {
@@ -507,13 +483,3 @@ input {
   box-shadow: 0 12px 40px rgba(0, 0, 0, 0.45);
 }
 
-.demo-banner {
-  background: rgba(217, 179, 106, 0.12);
-  border: 1px solid rgba(217, 179, 106, 0.35);
-  color: var(--gold-300);
-  border-radius: 10px;
-  padding: 10px 16px;
-  font-size: 13px;
-  margin-bottom: 22px;
-  line-height: 1.5;
-}

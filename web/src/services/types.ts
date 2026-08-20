@@ -9,9 +9,8 @@ import type {
 } from '../types';
 
 /**
- * The narrow seams between the UI and the identity/booking backends.
- * `mock` and `live` implement the same contracts (ADR-007), so the demo
- * flow is identical with and without a deployed stack.
+ * The narrow seams between the UI and the identity/booking backends,
+ * implemented by `live` against the deployed Cognito user pool and API.
  */
 
 export interface StepUpChallenge {
@@ -32,17 +31,9 @@ export interface BookingService {
   create(session: Session, input: BookingInput, proof?: StepUpProof): Promise<CreateBookingResult>;
 }
 
-/** Simulated email delivered in mock mode, rendered by the inbox panel. */
-export interface MockEmail {
-  at: number;
-  to: string;
-  subject: string;
-  otp: string;
-}
-
 type Listener<T> = (items: T[]) => void;
 
-/** Minimal observable list used for the event log and the mock inbox. */
+/** Minimal observable list used for the event log. */
 export class Feed<T> {
   private items: T[] = [];
   private listeners = new Set<Listener<T>>();
@@ -60,7 +51,6 @@ export class Feed<T> {
 }
 
 export const eventLog = new Feed<AuthEvent>();
-export const mockInbox = new Feed<MockEmail>();
 
 export const logEvent = (actor: AuthEvent['actor'], title: string, detail?: string) =>
   eventLog.push({ at: Date.now(), actor, title, detail });

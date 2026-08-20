@@ -21,7 +21,7 @@ enrichment and concierge desk override).
 | `backend/` | Lambda handlers: three Cognito custom auth triggers + the booking API |
 | `backend/tests/` | Unit tests for every Lambda handler (`node --test`, no extra deps) |
 | `infra/` | AWS CDK (TypeScript) app that deploys the whole stack to any account |
-| `web/` | React demo UI (Vite). Runs standalone in mock mode, or against a deployed stack |
+| `web/` | React demo UI (Vite), built against the deployed stack and published to CloudFront |
 | `scripts/` | Operational helpers (e.g. seeding a demo user) |
 | `docs/REQUIREMENTS.md` | Requirements specification and task breakdown |
 | `docs/SECURITY_COMPLIANCE.md` | Security posture, accepted risks, and why |
@@ -30,19 +30,16 @@ enrichment and concierge desk override).
 | `DECISIONS.md` | Architecture decision log |
 | `PROGRESS.md` | Build progress log |
 
-## Quick start (local demo, no AWS account needed)
+## Quick start
 
 ```bash
-cd web
-npm install
-npm run dev
+./scripts/deploy.sh
 ```
 
-Open http://localhost:5173. The app boots in **mock mode**: sign in with
-`demo@anycompany.example` / `Demo#Pass1`, book a room, and any booking over the
-threshold triggers the step-up OTP dialog. The simulated "email inbox" panel shows
-the OTP so the whole flow can be demonstrated end to end without any cloud
-resources.
+One command deploys the whole stack into the current AWS account/region and
+prints a public **CloudFront URL** for the demo UI plus the seeded demo user's
+credentials. Open the URL, sign in, book a room — any booking over the
+threshold triggers the step-up OTP dialog.
 
 ### Suggested demo script (≈3 minutes)
 
@@ -51,8 +48,9 @@ resources.
 3. Book the **Presidential Suite ($1500)** — the API answers `403 step_up_required`
    and the verification dialog opens.
 4. Enter a wrong code once — "2 attempts left" (the 3-attempt lockout is real).
-5. Read the 6-digit code from the simulated inbox, enter it — fresh tokens are
-   issued, the booking retries automatically and lands with a
+5. Read the 6-digit code from the OTP email (with `SES_FROM_ADDRESS` set) or from
+   the CreateAuthChallenge Lambda's CloudWatch log group, enter it — fresh tokens
+   are issued, the booking retries automatically and lands with a
    **step-up verified** badge.
 
 ## Running the tests
@@ -61,20 +59,20 @@ resources.
 cd backend && npm install && npm test   # 29 unit tests, node --test
 ```
 
-## Deploying the real stack (one command)
+## Deployment details
 
 ```bash
-./scripts/deploy.sh you@example.com 'YourPass#2026x'
+./scripts/deploy.sh you@example.com 'YourPass#2026x'   # custom demo user
 ```
 
-This bootstraps CDK if needed, deploys the stack, seeds the demo user, builds
-the web UI and publishes it to **CloudFront** (private S3 origin, Block Public
-Access on, OAC-only reads) — the script prints the `https://…cloudfront.net`
+The script bootstraps CDK if needed, deploys the stack, seeds the demo user,
+builds the web UI and publishes it to **CloudFront** (private S3 origin, Block
+Public Access on, OAC-only reads) — it prints the `https://…cloudfront.net`
 demo URL at the end, ready to share with an audience. It also writes
-`web/.env.local`, so `npm run dev` in `web/` runs the same **live mode**
-locally. Optional knobs via env: `STEP_UP_THRESHOLD`, `SES_FROM_ADDRESS`
-(real OTP emails), `WEB_ORIGIN` (extra CORS origin for local dev).
-Tear down with `./scripts/destroy.sh`.
+`web/.env.local`, so `npm run dev` in `web/` runs the same UI locally against
+the deployed stack. Optional knobs via env: `STEP_UP_THRESHOLD`,
+`SES_FROM_ADDRESS` (real OTP emails), `WEB_ORIGIN` (extra CORS origin for
+local dev). Tear down with `./scripts/destroy.sh`.
 
 Manual step-by-step equivalents are in
 [`docs/PORTING_GUIDE.md`](docs/PORTING_GUIDE.md#1-run-the-reference-as-is).

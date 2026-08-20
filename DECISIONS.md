@@ -100,8 +100,7 @@ assumed in a reviewer's or customer's sandbox account.
 **Decision.** `CreateAuthChallenge` delivers the OTP via SES only when
 `SES_FROM_ADDRESS` is configured; otherwise it logs a redacted marker plus the
 OTP to CloudWatch Logs (demo convenience, documented as a known risk in
-`docs/SECURITY_COMPLIANCE.md`). The demo UI's mock mode renders a simulated
-inbox instead.
+`docs/SECURITY_COMPLIANCE.md`).
 
 **Alternatives rejected.**
 - *Require SES setup*: blocks one-command deploy in fresh accounts.
@@ -110,7 +109,7 @@ inbox instead.
 
 ---
 
-## ADR-007: Demo UI ships a mock mode
+## ADR-007: Demo UI ships a mock mode *(withdrawn 2026-08-20)*
 
 **Context.** The customer demo must be runnable in a conference room with no AWS
 access, and reviewers must be able to see the flow without deploying.
@@ -123,3 +122,9 @@ is by configuration only.
 
 **Consequence.** The mock must be kept behaviorally faithful to the Lambdas; the
 porting guide calls this out as a maintenance point.
+
+**Status.** Withdrawn: the mock implementation was removed once the demo UI
+became publicly hosted on CloudFront — the hosted live flow covers every demo
+scenario, and dropping the mock removes the drift risk. The narrow
+`AuthService`/`BookingService` seams remain, so a mock can be reintroduced
+without touching the UI.

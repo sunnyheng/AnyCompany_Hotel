@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { config } from './config';
+import { isConfigured } from './config';
 import type { Booking, BookingInput, Session, StepUpProof } from './types';
 import { bookingApi } from './services';
 import SignIn from './components/SignIn';
@@ -7,7 +7,6 @@ import Rooms, { BookingRequest } from './components/Rooms';
 import Bookings from './components/Bookings';
 import StepUpModal from './components/StepUpModal';
 import EventLog from './components/EventLog';
-import InboxPanel from './components/InboxPanel';
 
 export default function App() {
   const [session, setSession] = useState<Session | null>(null);
@@ -65,6 +64,22 @@ export default function App() {
       currency: 'USD',
     });
 
+  if (!isConfigured) {
+    return (
+      <div className="signin-wrap">
+        <div className="signin-card">
+          <h1>ANYCOMPANY</h1>
+          <p className="tagline">Demo UI is not configured</p>
+          <p>
+            Deploy the stack with <code>./scripts/deploy.sh</code> — it writes{' '}
+            <code>web/.env.local</code> with the Cognito and API settings this UI needs, then
+            publishes the site.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   if (!session) {
     return <SignIn onSignedIn={setSession} />;
   }
@@ -77,22 +92,13 @@ export default function App() {
           <span className="brand-sub">Hotels &amp; Resorts</span>
         </div>
         <div className="header-user">
-          <span className={`mode-pill ${config.mode}`}>{config.mode} mode</span>
+          <span className="mode-pill live">live mode</span>
           <span>{session.email}</span>
           <button className="btn-ghost" onClick={() => setSession(null)}>
             Sign out
           </button>
         </div>
       </header>
-
-      {config.mode === 'mock' && (
-        <div className="demo-banner">
-          Running in <strong>mock mode</strong> — the entire flow (including the OTP email) is
-          simulated in the browser. Deploy the CDK stack and fill in <code>web/.env.local</code>{' '}
-          to run against real Cognito. Bookings above <strong>${config.stepUpThreshold}</strong>{' '}
-          require step-up verification.
-        </div>
-      )}
 
       <div className="main-grid">
         <main>
@@ -101,7 +107,6 @@ export default function App() {
         </main>
         <aside className="sidebar">
           <EventLog />
-          {config.mode === 'mock' && <InboxPanel />}
         </aside>
       </div>
 
