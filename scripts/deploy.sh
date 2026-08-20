@@ -49,6 +49,9 @@ fi
 USER_POOL_ID="$(node -p "require('$OUTPUTS_FILE')['$STACK_NAME'].UserPoolId")"
 CLIENT_ID="$(node -p "require('$OUTPUTS_FILE')['$STACK_NAME'].UserPoolClientId")"
 API_URL="$(node -p "require('$OUTPUTS_FILE')['$STACK_NAME'].ApiUrl")"
+WEB_BUCKET="$(node -p "require('$OUTPUTS_FILE')['$STACK_NAME'].WebBucketName")"
+DISTRIBUTION_ID="$(node -p "require('$OUTPUTS_FILE')['$STACK_NAME'].WebDistributionId")"
+WEB_URL="$(node -p "require('$OUTPUTS_FILE')['$STACK_NAME'].WebUrl")"
 REGION="$(aws configure get region || true)"
 REGION="${REGION:-$(aws sts get-caller-identity --query Arn --output text | cut -d: -f4)}"
 REGION="${AWS_REGION:-${AWS_DEFAULT_REGION:-$REGION}}"
@@ -65,18 +68,26 @@ VITE_API_URL=$API_URL
 VITE_STEP_UP_THRESHOLD=$THRESHOLD
 EOF
 
+echo "==> Building the demo UI (live mode, config baked from .env.local)"
+(cd "$ROOT/web" && npm install --silent && npm run build)
+
+echo "==> Publishing the demo UI to CloudFront (private S3 origin)"
+aws s3 sync "$ROOT/web/dist" "s3://$WEB_BUCKET" --delete
+aws cloudfront create-invalidation --distribution-id "$DISTRIBUTION_ID" \
+  --paths '/*' --query 'Invalidation.Id' --output text >/dev/null
+
 cat <<EOF
 
 Deployment complete.
 
+  Demo UI   : $WEB_URL
   User pool : $USER_POOL_ID
   App client: $CLIENT_ID
   API       : $API_URL
   Demo user : $EMAIL / $PASSWORD
 
-Start the demo UI in live mode:
-
-  cd web && npm install && npm run dev    # header shows 'live mode'
+Open the Demo UI URL in a browser (header shows 'live mode'), or run it
+locally with: cd web && npm install && npm run dev
 
 Without SES_FROM_ADDRESS, read OTPs from the CreateAuthChallenge Lambda's
 CloudWatch log group. Tear everything down with: ./scripts/destroy.sh
