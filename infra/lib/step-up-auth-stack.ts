@@ -78,8 +78,17 @@ export class StepUpAuthStack extends cdk.Stack {
 
     const userPool = new cognito.UserPool(this, 'UserPool', {
       userPoolName: 'anycompany-hotel-stepup-reference',
-      selfSignUpEnabled: false, // demo users are seeded by scripts/create-demo-user.sh
+      // Visitors can register with their own email (verified by a code sent
+      // through Cognito's default mail channel); scripts/create-demo-user.sh
+      // still seeds the shared demo account.
+      selfSignUpEnabled: true,
       signInAliases: { email: true },
+      autoVerify: { email: true },
+      userVerification: {
+        emailStyle: cognito.VerificationEmailStyle.CODE,
+        emailSubject: 'AnyCompany Hotels — your verification code',
+        emailBody: 'Your AnyCompany Hotels verification code is {####}.',
+      },
       passwordPolicy: {
         minLength: 12,
         requireLowercase: true,
