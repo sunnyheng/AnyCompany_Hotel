@@ -6,6 +6,9 @@ import * as dynamodb from 'aws-cdk-lib/aws-dynamodb';
 import * as iam from 'aws-cdk-lib/aws-iam';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
 import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
+import * as s3 from 'aws-cdk-lib/aws-s3';
+import * as cloudfront from 'aws-cdk-lib/aws-cloudfront';
+import * as origins from 'aws-cdk-lib/aws-cloudfront-origins';
 import * as apigwv2 from 'aws-cdk-lib/aws-apigatewayv2';
 import { HttpLambdaIntegration } from 'aws-cdk-lib/aws-apigatewayv2-integrations';
 import { HttpUserPoolAuthorizer } from 'aws-cdk-lib/aws-apigatewayv2-authorizers';
@@ -116,6 +119,36 @@ export class StepUpAuthStack extends cdk.Stack {
       removalPolicy: cdk.RemovalPolicy.DESTROY,
     });
 
+    // --- Demo UI hosting: CloudFront in front of a fully private S3 origin --
+    // The bucket blocks all public access (all four settings) and is readable
+    // only by this distribution via Origin Access Control; viewers reach the
+    // static assets exclusively through CloudFront over HTTPS.
+
+    const webBucket = new s3.Bucket(this, 'WebBucket', {
+      blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
+      encryption: s3.BucketEncryption.S3_MANAGED,
+      enforceSSL: true,
+      // Reference/demo stack: allow clean teardown in evaluation accounts.
+      removalPolicy: cdk.RemovalPolicy.DESTROY,
+      autoDeleteObjects: true,
+    });
+
+    const distribution = new cloudfront.Distribution(this, 'WebDistribution', {
+      comment: 'AnyCompany Hotels step-up auth demo UI',
+      defaultBehavior: {
+        origin: origins.S3BucketOrigin.withOriginAccessControl(webBucket),
+        viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
+      },
+      defaultRootObject: 'index.html',
+      // SPA routing: a private-origin miss surfaces as 403 from S3, so map
+      // both 403 and 404 back to index.html.
+      errorResponses: [
+        { httpStatus: 403, responseHttpStatus: 200, responsePagePath: '/index.html' },
+        { httpStatus: 404, responseHttpStatus: 200, responsePagePath: '/index.html' },
+      ],
+    });
+    const webUrl = `https://${distribution.distributionDomainName}`;
+
     // --- Booking API ---------------------------------------------------------
 
     const bookingFn = new NodejsFunction(this, 'BookingApi', {
@@ -136,7 +169,8 @@ export class StepUpAuthStack extends cdk.Stack {
     const httpApi = new apigwv2.HttpApi(this, 'BookingHttpApi', {
       apiName: 'anycompany-hotel-stepup-bookings',
       corsPreflight: {
-        allowOrigins: [props.webOrigin],
+        // The hosted demo UI plus the configurable local-dev origin.
+        allowOrigins: [webUrl, props.webOrigin],
         allowMethods: [apigwv2.CorsHttpMethod.GET, apigwv2.CorsHttpMethod.POST],
         allowHeaders: ['authorization', 'content-type', 'x-step-up-token'],
         maxAge: cdk.Duration.minutes(10),
@@ -161,5 +195,8 @@ export class StepUpAuthStack extends cdk.Stack {
     new cdk.CfnOutput(this, 'UserPoolClientId', { value: userPoolClient.userPoolClientId });
     new cdk.CfnOutput(this, 'ApiUrl', { value: httpApi.apiEndpoint });
     new cdk.CfnOutput(this, 'StepUpThreshold', { value: String(props.stepUpThreshold) });
+    new cdk.CfnOutput(this, 'WebBucketName', { value: webBucket.bucketName });
+    new cdk.CfnOutput(this, 'WebDistributionId', { value: distribution.distributionId });
+    new cdk.CfnOutput(this, 'WebUrl', { value: webUrl });
   }
 }
