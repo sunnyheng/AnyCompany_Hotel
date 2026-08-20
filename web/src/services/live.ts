@@ -5,8 +5,10 @@
  */
 import {
   CognitoIdentityProviderClient,
+  ConfirmSignUpCommand,
   InitiateAuthCommand,
   RespondToAuthChallengeCommand,
+  SignUpCommand,
 } from '@aws-sdk/client-cognito-identity-provider';
 import { config } from '../config';
 import type {
@@ -63,6 +65,31 @@ export const liveAuth: AuthService = {
       idToken: auth.IdToken,
       accessToken: auth.AccessToken,
     };
+  },
+
+  async signUp(email, password) {
+    logEvent('Browser', 'SignUp', email);
+    await client().send(
+      new SignUpCommand({
+        ClientId: config.userPoolClientId,
+        Username: email,
+        Password: password,
+        UserAttributes: [{ Name: 'email', Value: email }],
+      }),
+    );
+    logEvent('Cognito', 'Verification code emailed', email);
+  },
+
+  async confirmSignUp(email, code) {
+    logEvent('Browser', 'ConfirmSignUp', email);
+    await client().send(
+      new ConfirmSignUpCommand({
+        ClientId: config.userPoolClientId,
+        Username: email,
+        ConfirmationCode: code,
+      }),
+    );
+    logEvent('Cognito', 'Account confirmed', email);
   },
 
   async startStepUp(session): Promise<StepUpChallenge> {

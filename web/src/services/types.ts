@@ -20,6 +20,10 @@ export interface StepUpChallenge {
 
 export interface AuthService {
   signIn(email: string, password: string): Promise<Session>;
+  /** Register a new account; Cognito emails a verification code. */
+  signUp(email: string, password: string): Promise<void>;
+  /** Confirm the emailed verification code for a newly registered account. */
+  confirmSignUp(email: string, code: string): Promise<void>;
   /** Begin a CUSTOM_AUTH round; resolves once the OTP has been issued. */
   startStepUp(session: Session): Promise<StepUpChallenge>;
   /** Answer the pending OTP challenge. */
