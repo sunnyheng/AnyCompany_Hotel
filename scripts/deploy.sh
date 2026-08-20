@@ -52,12 +52,23 @@ API_URL="$(node -p "require('$OUTPUTS_FILE')['$STACK_NAME'].ApiUrl")"
 WEB_BUCKET="$(node -p "require('$OUTPUTS_FILE')['$STACK_NAME'].WebBucketName")"
 DISTRIBUTION_ID="$(node -p "require('$OUTPUTS_FILE')['$STACK_NAME'].WebDistributionId")"
 WEB_URL="$(node -p "require('$OUTPUTS_FILE')['$STACK_NAME'].WebUrl")"
+TABLE_NAME="$(node -p "require('$OUTPUTS_FILE')['$STACK_NAME'].TableName")"
 REGION="$(aws configure get region || true)"
 REGION="${REGION:-$(aws sts get-caller-identity --query Arn --output text | cut -d: -f4)}"
 REGION="${AWS_REGION:-${AWS_DEFAULT_REGION:-$REGION}}"
 
+echo "==> Seeding room catalog"
+"$ROOT/scripts/seed-config.sh" "$TABLE_NAME" >/dev/null && echo "    4 rooms seeded into $TABLE_NAME"
+
 echo "==> Seeding demo user $EMAIL"
 "$ROOT/scripts/create-demo-user.sh" "$USER_POOL_ID" "$EMAIL" "$PASSWORD"
+
+ADMIN_EMAIL="${ADMIN_EMAIL:-admin@anycompany.example}"
+ADMIN_PASSWORD="${ADMIN_PASSWORD:-Admin#Pass-2026}"
+echo "==> Seeding admin user $ADMIN_EMAIL (admins group)"
+"$ROOT/scripts/create-demo-user.sh" "$USER_POOL_ID" "$ADMIN_EMAIL" "$ADMIN_PASSWORD"
+aws cognito-idp admin-add-user-to-group \
+  --user-pool-id "$USER_POOL_ID" --username "$ADMIN_EMAIL" --group-name admins
 
 echo "==> Writing web/.env.local"
 cat > "$ROOT/web/.env.local" <<EOF
@@ -85,6 +96,7 @@ Deployment complete.
   App client: $CLIENT_ID
   API       : $API_URL
   Demo user : $EMAIL / $PASSWORD
+  Admin user: $ADMIN_EMAIL / $ADMIN_PASSWORD  (can change the step-up threshold)
 
 Open the Demo UI URL in a browser (header shows 'live mode'), or run it
 locally with: cd web && npm install && npm run dev
