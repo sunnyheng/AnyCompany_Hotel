@@ -13,6 +13,11 @@
 #
 # Prerequisites: AWS CLI with credentials, Node.js >= 20.
 set -euo pipefail
+# Every step below is idempotent, so a transient failure (network blip,
+# throttling) is recovered by simply re-running the script.
+trap 'echo "
+ERROR: deploy.sh failed at line $LINENO (see the message above).
+Every step is idempotent — fix the cause and re-run ./scripts/deploy.sh." >&2' ERR
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 STACK_NAME="AnyCompanyHotelStepUpAuth"
