@@ -64,7 +64,7 @@ that changes the threshold at runtime — no redeploy needed.
 ## Running the tests
 
 ```bash
-cd backend && npm install && npm test   # 29 unit tests, node --test
+cd backend && npm install && npm test   # 38 unit tests, node --test
 ```
 
 ## Deployment details
